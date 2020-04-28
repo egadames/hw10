@@ -2,11 +2,6 @@ const express = require('express');
 const inquirer = require('inquirer');
 const connection = require('./config/connection');
 
-// connection.connect((err) => {
-//   if (err) throw err;
-//   start();
-// });
-
 const PORT = 3001;
 const app = express();
 
@@ -28,13 +23,13 @@ const start = () => {
     .then((answer) => {
       switch (answer.start) {
         case 'View All Departments':
-          viewAllEmployees();
+          getAllDepartments();
           break;
         case 'Add a Department':
-          viewAllEmployees();
+          addDepartment();
           break;
         case 'Delete a Department':
-          viewAllEmployees();
+          deleteDepartment();
           break;
         default:
           connection.end();
