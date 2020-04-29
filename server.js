@@ -1,12 +1,136 @@
-const express = require('express');
+const util = require('util');
 const inquirer = require('inquirer');
+const _ = require('underscore');
 const connection = require('./config/connection');
 
-const PORT = 3001;
-const app = express();
+connection.query = util.promisify(connection.query);
 
-app.use(express.urlencoded({ extended: true }));
-app.use(express.json());
+const getAllDepartments = async () => {
+  try {
+    const res = await connection.query('SELECT * FROM department;');
+    return (res);
+  } catch (error) {
+    if (error) throw error;
+  }
+};
+
+const addDepartment = async () => {
+  try {
+    const department = await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'name',
+        message: 'Enter the new department you would like to add?',
+      },
+    ]);
+    const query = 'INSERT INTO department (name) VALUES (?);';
+    const res = connection.query(query, department.name);
+    start();
+    return (res);
+  } catch (error) {
+    if (error) throw error;
+  }
+};
+
+const deleteDepartment = async () => {
+  let names = await getAllDepartments();
+  names = _.pluck(names, 'name');
+  try {
+    const department = await inquirer.prompt([
+      {
+        type: 'list',
+        name: 'departmentName',
+        message: 'Which department would you like to remove?',
+        choices: names,
+      },
+    ]);
+    const query = 'DELETE FROM department WHERE name = ?;';
+    const res = connection.query(query, department.departmentName);
+    start();
+    return (res);
+  } catch (error) {
+    if (error) throw error;
+  }
+};
+
+const viewAllEmployees = async () => {
+  try {
+    const query = `SELECT employee.id, first_name, last_name, roles.title, department.name, roles.salary, manager_id
+                  FROM employee, roles, department
+                  WHERE employee.role_id = roles.id
+                  AND roles.department_id = department.id`;
+    const res = await connection.query(query);
+    return (res);
+  } catch (error) {
+    if (error) throw error;
+  }
+};
+
+const addNewEmployee = async () => {
+  const results = await viewAllEmployees();
+  const employeeTitles = _.pluck(results, 'title');
+
+  const fullNames = [];
+  for (const fullName of results) {
+    fullNames.push(`${fullName['first_name']} ${fullName['last_name']}`);
+  }
+
+  try {
+    const employee = await inquirer.prompt([
+      {
+        type: 'input',
+        name: 'firstName',
+        message: "What is the employee's first name? ",
+      },
+      {
+        type: 'input',
+        name: 'lastName',
+        message: "What is the employee's last name? ",
+      },
+      {
+        type: 'list',
+        name: 'title',
+        message: "What is employee's role? ",
+        choices: employeeTitles,
+      },
+      {
+        type: 'list',
+        name: 'manager',
+        message: "Who is employee's manager ?",
+        choices: fullNames,
+      },
+    ]);
+    const query = 'INSERT INTO employee (first_name, last_name, role_id, manager_id) VALUES("?", "?", "?", "?");';
+
+
+    let names = await getAllDepartments();
+    names = _.pluck(names, 'name');
+    console.log(names);
+
+    let i;
+    for (i = 0; i < names.length; i++) {
+      if (employee.title === names[i]) {
+        return (i);
+      }
+    }
+
+    let managerID = await viewAllEmployees();
+    console.log(managerID);
+
+    let m;
+    for (m = 0; m < names.length; m++) {
+      if (employee.title === names[m]) {
+        return (m);
+      }
+    }
+    console.log(m)
+    const res = connection.query(query, [employee.firstName, employee.lastName, i, employee.manager]);
+    start();
+    return (res);
+  } catch (error) {
+    if (error) throw error;
+  }
+};
 
 const start = () => {
   inquirer
@@ -15,21 +139,42 @@ const start = () => {
       message: 'What would you like to do?',
       type: 'list',
       choices: [
+        'View All Employees',
+        'Add a New Employee',
+        'View All Employees by Manager',
+        'Update Employee Roles',
         'View All Departments',
         'Add a Department',
         'Delete a Department',
+        'Exit',
       ],
     })
-    .then((answer) => {
+    .then(async (answer) => {
       switch (answer.start) {
+        case 'View All Employees':
+          console.table(await viewAllEmployees());
+          break;
+        case 'Add a New Employee':
+          addNewEmployee();
+          break;
+        case 'View All Employees by Manager':
+          viewAllEmployeesByManager();
+          break;
+        case 'Update Employee Roles':
+          updateEmployeeRole();
+          break;
         case 'View All Departments':
-          getAllDepartments();
+          console.table(await getAllDepartments());
+          start();
           break;
         case 'Add a Department':
-          addDepartment();
+          await addDepartment();
           break;
         case 'Delete a Department':
-          deleteDepartment();
+          await deleteDepartment();
+          break;
+        case 'Exit':
+          connection.end();
           break;
         default:
           connection.end();
@@ -37,105 +182,4 @@ const start = () => {
     });
 };
 
-app.listen(PORT);
-
-// 'View All Employees',
-// 'View All Employees by department',
-// 'View All Employees by Manager',
-// 'View All Roles',
-
-// case 'View All Employees by department':
-//   viewAllEmployeesByDepartment();
-//   break;
-// case 'View All Employees by Manager':
-//   viewAllEmployeesByManager();
-//   break;
-// case 'View All Roles':
-//   viewAllRoles();
-//   break;
-// case 'View All Departments':
-//   viewAllDepartment();
-//   break;
-// case 'Add Employee':
-//   addEmployee();
-//   break;
-// case 'Remove Employee':
-//   removeEmployee();
-//   break;
-// case 'Update Employee Role':
-//   updateEmployeeRole();
-//   break;
-
-// const viewAll = async (req, res) => {
-//   try {
-//     const query = 'INSERT INTO auctions SET ?;';
-//     const [todos] = await connection.query(todoQueries.findAllTodos);
-//     return res.status(200).json(todos);
-//   } catch (e) {
-//     return res.status(403).json({ e });
-//   }
-//   },
-// }
-
-// const addEmployee = async (req, res) => {
-//   try {
-//     inquirer.prompt([
-//       {
-//         type: 'input',
-//         name: 'firstName',
-//         message: 'What is your employee's first name?',
-//         // validate: confirmString
-//       },
-//       {
-//         type: 'input',
-//         name: 'lastName',
-//         message: 'What is your employee's last name?',
-//         // validate: confirmNumber
-//       },
-//       {
-//         type: 'list',
-//         name: 'employeeRoles',
-//         message: 'What is the employee's role?',
-//         choices: ['Sales Lead', 'Salesperson', 'Lead Engineer', 'Software Engineer', 'Account Manager', 'Accountant', 'Legal Team Lead', 'Lawyer']
-//         // validate: confirmEmail
-//       },
-//       {
-//         type: 'input',
-//         name: 'employeeManager',
-//         message: 'Who is the employee's Manager?',
-//         choices: [employees]
-//       },
-//      catch (error) {
-//     if (error) throw error;
-//   };
-// }
-
-// getAllEmployees = () => {
-//   return new Promise((resolve, reject) => {
-//     const query = 'SELECT * FROM employee';
-//     db.query(query, (err, results, fields) => {
-//       if (err) {
-//         reject(err);
-//       } else {
-//         const employees = [];
-//         for (const employee of results) {
-//           const firstName = employee['first_name'];
-//           const lastName = employee['last_name'];
-//           employees.push(`${firstName} ${lastName}`);
-//         }
-//         resolve(employees);
-//       }
-//     });
-//   });
-// };
-
-// const viewAllEmployees = async (req, res) => {
-//   try {
-//     const query = 'INSERT INTO auctions SET ?;';
-//     const [response] = await connection.query();
-//     return res.status(200).json(todos);
-//   } catch (e) {
-//     return res.status(403).json({ e });
-//   }
-// },
-// };
+start();
