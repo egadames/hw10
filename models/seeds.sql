@@ -1,7 +1,7 @@
 USE employeeTracker_db;
 
 INSERT INTO department(name)
-VALUES ('Sales=1'),('Engineering=2'),('Finance=3'),('Legal=4');
+VALUES ('Sales'),('Engineering'),('Finance'),('Legal');
 
 INSERT INTO employee(first_name, last_name, role_id, manager_id)
 VALUES 
@@ -13,7 +13,7 @@ VALUES
 
 INSERT INTO roles(title, salary, department_id)
 VALUES 
-('Sales Lead', 100000, department_id),
+('Sales Lead', 100000, 1),
 ('Sales Lead', 100000, 1), ('Salesperson', 80000, 1),
 ('Lawyer', 190000, 2),
 ('Legal Team Lead', 250000, 2),

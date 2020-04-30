@@ -55,10 +55,11 @@ const deleteDepartment = async () => {
   }
 };
 
-const getAllRoles = async () => {
+const getAllRoles = async (result) => {
   try {
-    const res = await connection.query('SELECT * FROM roles;');
-    return (res);
+    const result = await connection.query('SELECT * FROM roles;');
+    console.log(result);
+    return (result);
   } catch (error) {
     if (error) throw error;
   }
@@ -73,6 +74,7 @@ const getRoleId = (dep, role) => {
   }
 };
 
+
 const addRole = async () => {
   let departmentNames = await getAllDepartments();
   departmentNames = _.pluck(departmentNames, 'name');
@@ -84,7 +86,7 @@ const addRole = async () => {
         message: 'Please enter the role that you would like to add: ',
       },
       {
-        type: 'input',
+        type: 'number',
         name: 'salary',
         message: 'Please enter the salary assigned for this role: ',
       },
@@ -97,7 +99,6 @@ const addRole = async () => {
     ]);
     const roleId = getRoleId(departmentNames, role.department);
 
-    console.log(roleId);
     const query = 'INSERT INTO roles (title, salary, department_id) VALUES ("?", "?", "?");';
     const res = connection.query(query, [role.role, role.salary, roleId]);
     start();
@@ -108,19 +109,19 @@ const addRole = async () => {
 };
 
 const deleteRole = async () => {
-  let AllRoles = await getAllRoles();
-  AllRoles = _.pluck(AllRoles, 'name');
+  let allRoles = await getAllRoles();
+  allRoles = _.pluck(allRoles, 'title');
   try {
     const role = await inquirer.prompt([
       {
         type: 'list',
         name: 'roleName',
         message: 'Which role would you like to remove?',
-        choices: AllRoles,
+        choices: allRoles,
       },
     ]);
 
-    const query = 'DELETE FROM role WHERE title = ?;';
+    const query = 'DELETE FROM roles WHERE title = ?;';
     const res = connection.query(query, role.roleName);
     start();
     return (res);
@@ -157,7 +158,7 @@ const start = () => {
           start();
           break;
         case 'Delete a Role':
-          viewAllEmployeesByManager();
+          await deleteRole();
           break;
         case 'Update Employee Roles':
           updateEmployeeRole();
