@@ -1,24 +1,102 @@
-// const inquirer = require('inquirer');
+const util = require('util');
+const inquirer = require('inquirer');
+const _ = require('underscore');
 const connection = require('../config/connection');
+connection.query = util.promisify(connection.query);
 
 module.exports = {
-  addDepartment: async (req, res) => {
+  addDepartment: async () => {
     try {
-      const query ='INSERT INTO department (name) VALUES (?)';
-      const [response] = await connection.query(query, { text });
-      return res.json(response);
-    } catch (e) {
-      return res.status(403).json({ e });
+      const department = await inquirer.prompt([
+        {
+          type: 'input',
+          name: 'name',
+          message: 'Enter the new department you would like to add?',
+        },
+      ]);
+      const query = 'INSERT INTO department (name) VALUES (?);';
+      const res = connection.query(query, department.name);
+      // start();
+      return (res);
+    } catch (error) {
+      if (error) throw error;
     }
   },
-  deleteDepartment,
-  getAllDepartments: async (req, res) => {
+  deleteDepartment: async () => {
+    let names = await getAllDepartments();
+    names = _.pluck(names, 'name');
     try {
-      const query = 'SELECT * FROM department';
-      const [response] = await connection.query(query);
-      return res.json(response);
-    } catch (e) {
-      return res.json({ e });
+      const department = await inquirer.prompt([
+        {
+          type: 'list',
+          name: 'departmentName',
+          message: 'Which department would you like to remove?',
+          choices: names,
+        },
+      ]);
+      const query = 'DELETE FROM department WHERE name = ?;';
+      const res = connection.query(query, department.departmentName);
+      // start();
+      return (res);
+    } catch (error) {
+      if (error) throw error;
     }
   },
-}
+  getAllDepartments: async () => {
+    try {
+      const res = await connection.query('SELECT * FROM department;');
+      return (res);
+    } catch (error) {
+      if (error) throw error;
+    }
+  },
+};
+
+
+// const getAllDepartments = async () => {
+//   try {
+//     const res = await connection.query('SELECT * FROM department;');
+//     return (res);
+//   } catch (error) {
+//     if (error) throw error;
+//   }
+// };
+
+// const addDepartment = async () => {
+//   try {
+//     const department = await inquirer.prompt([
+//       {
+//         type: 'input',
+//         name: 'name',
+//         message: 'Enter the new department you would like to add?',
+//       },
+//     ]);
+//     const query = 'INSERT INTO department (name) VALUES (?);';
+//     const res = connection.query(query, department.name);
+//     start();
+//     return (res);
+//   } catch (error) {
+//     if (error) throw error;
+//   }
+// };
+
+// const deleteDepartment = async () => {
+//   let names = await getAllDepartments();
+//   names = _.pluck(names, 'name');
+//   try {
+//     const department = await inquirer.prompt([
+//       {
+//         type: 'list',
+//         name: 'departmentName',
+//         message: 'Which department would you like to remove?',
+//         choices: names,
+//       },
+//     ]);
+//     const query = 'DELETE FROM department WHERE name = ?;';
+//     const res = connection.query(query, department.departmentName);
+//     start();
+//     return (res);
+//   } catch (error) {
+//     if (error) throw error;
+//   }
+// };
