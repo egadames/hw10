@@ -1,8 +1,7 @@
-const util = require('util');
 const inquirer = require('inquirer');
 const _ = require('underscore');
 const connection = require('../config/connection');
-connection.query = util.promisify(connection.query);
+const validate = require('../models/validation');
 
 module.exports = {
   addDepartment: async () => {
@@ -12,12 +11,12 @@ module.exports = {
           type: 'input',
           name: 'name',
           message: 'Enter the new department you would like to add?',
+          validate: validate.confirmString,
         },
       ]);
       const query = 'INSERT INTO department (name) VALUES (?);';
-      const res = await connection.query(query, department.name);
-      // start();
-      return (res);
+      await connection.query(query, department.name);
+      console.log('The department has been added');
     } catch (error) {
       if (error) throw error;
     }
@@ -35,9 +34,8 @@ module.exports = {
         },
       ]);
       const query = 'DELETE FROM department WHERE name = ?;';
-      const res = connection.query(query, department.departmentName);
-      // start();
-      return (res);
+      await connection.query(query, department.departmentName);
+      console.log('The department has been deleted');
     } catch (error) {
       if (error) throw error;
     }
@@ -45,7 +43,7 @@ module.exports = {
   getAllDepartments: async () => {
     try {
       const res = await connection.query('SELECT * FROM department;');
-      return (res);
+      console.table(res);
     } catch (error) {
       if (error) throw error;
     }

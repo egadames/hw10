@@ -14,8 +14,7 @@ CREATE TABLE roles(
     title VARCHAR(50) NOT NULL,
     salary INT NOT NULL,
     department_id INT NOT NULL,
-    PRIMARY KEY(id),
-
+    PRIMARY KEY(id)
 );
 
 CREATE TABLE employee(
@@ -24,8 +23,7 @@ CREATE TABLE employee(
     last_name VARCHAR(50) NOT NULL,
     role_id INT,
     manager_id INT NULL,
-    PRIMARY KEY(id),
-
+    PRIMARY KEY(id)
 );
 
 
