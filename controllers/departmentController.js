@@ -1,7 +1,7 @@
 const inquirer = require('inquirer');
-const _ = require('underscore');
 const connection = require('../config/connection');
-const validate = require('../models/validation');
+const validate = require('./validation');
+const reference = require('./reference');
 
 module.exports = {
   addDepartment: async () => {
@@ -21,19 +21,18 @@ module.exports = {
       if (error) throw error;
     }
   },
-  deleteDepartment: async (ref) => {
-    let names = await ref.getAllDepartments();
-    names = _.pluck(names, 'name');
+  deleteDepartment: async () => {
     try {
       const department = await inquirer.prompt([
         {
           type: 'list',
           name: 'departmentName',
           message: 'Which department would you like to remove?',
-          choices: names,
+          choices: reference.departmentList,
         },
       ]);
-      const query = 'DELETE FROM department WHERE name = ?;';
+
+      const query = 'DELETE FROM department WHERE id = ?;';
       await connection.query(query, department.departmentName);
       console.log('The department has been deleted');
     } catch (error) {

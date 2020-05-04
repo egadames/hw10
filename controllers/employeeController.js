@@ -1,21 +1,7 @@
 const inquirer = require('inquirer');
 const connection = require('../config/connection');
-const validate = require('../models/validation');
-
-const work = async () => {
-  const allEmployees = await connection.query('SELECT * FROM employee;');
-  const employeeList = await allEmployees.map((employees) => ({
-    name: `${employees.first_name} ${employees.last_name}`,
-    value: employees.id,
-  }));
-  return employeeList;
-};
-
-const roles = async () => {
-  const allRoles = await connection.query('SELECT * FROM roles;');
-  const allTitles = allRoles.map((title) => ({ name: title.title, value: title.id }));
-  return allTitles;
-};
+const validate = require('./validation');
+const reference = require('./reference');
 
 module.exports = {
   viewAllEmployees: async () => {
@@ -38,7 +24,7 @@ module.exports = {
           type: 'list',
           name: 'employee',
           message: 'Which role would you like to remove?',
-          choices: work,
+          choices: reference.employees,
         },
       ]);
       const query = 'DELETE FROM employee WHERE employee.id = ?;';
@@ -50,7 +36,7 @@ module.exports = {
   },
   addNewEmployee: async () => {
     try {
-      const employeeList = await work();
+      const employeeList = await reference.employees();
       employeeList.push({ name: 'None', value: 0 });
       const res = await inquirer.prompt([
         {
@@ -69,7 +55,7 @@ module.exports = {
           type: 'list',
           name: 'title',
           message: "What is employee's role? ",
-          choices: roles,
+          choices: reference.roles,
         },
         {
           type: 'list',
@@ -92,13 +78,13 @@ module.exports = {
           type: 'list',
           name: 'employee',
           message: 'Please pick an employee to update?: ',
-          choices: work,
+          choices: reference.employees,
         },
         {
           type: 'list',
           name: 'title',
           message: "Please enter the employee's new role?",
-          choices: roles,
+          choices: reference.roles,
         },
       ]);
       const query = 'UPDATE employee SET role_id = ? WHERE employee.id = ?;';
