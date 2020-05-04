@@ -51,7 +51,11 @@
 
 ## Screenshots
 
-![app screenshot](Assets\HW10.webm)
+![app screenshot 1](Assets\screenshot1.JPG)
+![app screenshot 2](Assets\screenshot2.JPG)
+![app screenshot 3](Assets\screenshot3.JPG)
+![app screenshot 4](Assets\screenshot4.JPG)
+
 
 ## Questions
 
