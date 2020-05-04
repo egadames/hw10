@@ -51,11 +51,10 @@
 
 ## Screenshots
 
-![app screenshot 1](Assets\screenshot1.JPG)
-![app screenshot 2](Assets\screenshot2.JPG)
-![app screenshot 3](Assets\screenshot3.JPG)
-![app screenshot 4](Assets\screenshot4.JPG)
-
+![app screenshot 1](https://github.com/egadames/hw10/blob/master/Assets/screenshot1.JPG)
+![app screenshot 2](https://github.com/egadames/hw10/blob/master/Assets/screenshot2.JPG)
+![app screenshot 3](https://github.com/egadames/hw10/blob/master/Assets/screenshot3.JPG)
+![app screenshot 4](https://github.com/egadames/hw10/blob/master/Assets/screenshot4.JPG)
 
 ## Questions
 
